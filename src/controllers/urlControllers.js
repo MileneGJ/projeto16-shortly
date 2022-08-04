@@ -1,15 +1,15 @@
-export default function createShortURL () {
+export function createShortURL () {
 
 }
 
-export default function getOneURL () {
+export function getOneURL () {
 
 }
 
-export default function openShortURL () {
+export function openShortURL () {
 
 }
 
-export default function deleteURL () {
+export function deleteURL () {
     
 }

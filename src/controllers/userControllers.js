@@ -1,7 +1,7 @@
-export default function listUserURLs () {
+export function listUserURLs () {
 
 }
 
-export default function listUserRanking () {
+export function listUserRanking () {
     
 }
