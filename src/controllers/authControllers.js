@@ -4,10 +4,11 @@ export async function createUser (_,res) {
     const user = res.locals.newUser
     try {
         await connection.query('INSERT INTO users (name, email, password) VALUES ($1,$2,$3)',
-        [user.name,user.email,user.password])
+        [user.name,user.email,user.password]);
+        res.sendStatus(201);
     } catch (error) {
         console.log(error);
-        res.status(500)
+        res.sendStatus(500)
     }
 }
 
