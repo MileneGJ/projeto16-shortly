@@ -19,8 +19,22 @@ export async function createShortURL (_,res) {
     }
 }
 
-export function getOneURL () {
-
+export async function getOneURL (req,res) {
+    const urlId = req.params.id;
+    try {
+        const foundUrl = await connection.query(
+            'SELECT id,"shortUrl",url FROM urls WHERE id=$1',
+            [urlId]
+            );
+        if(foundUrl) {
+            res.status(200).send(foundUrl);
+        } else {
+            res.sendStatus(404);
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
 }
 
 export function openShortURL () {
