@@ -26,8 +26,8 @@ export async function getOneURL (req,res) {
             'SELECT id,"shortUrl",url FROM urls WHERE id=$1',
             [urlId]
             );
-        if(foundUrl) {
-            res.status(200).send(foundUrl);
+        if(foundUrl.rows.length>0) {
+            res.status(200).send(foundUrl.rows[0]);
         } else {
             res.sendStatus(404);
         }
