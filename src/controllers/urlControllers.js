@@ -47,7 +47,7 @@ export async function openShortURL (req,res) {
         if(foundUrl.rows.length>0) {
             await connection.query(
                 'UPDATE urls SET "visitCount"=$1 WHERE id=$2',
-                [foundUrl.rows[0].visitCount++,foundUrl.rows[0].id]
+                [(foundUrl.rows[0].visitCount+1),foundUrl.rows[0].id]
             );
             return res.redirect(foundUrl.rows[0].url)
         } else {
