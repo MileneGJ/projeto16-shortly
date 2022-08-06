@@ -8,6 +8,6 @@ const router = Router();
 router.post("/urls/shorten",tokenVerify,validateURL,createShortURL);
 router.get("/urls/:id",getOneURL);
 router.get("/urls/open/:shortUrl",openShortURL);
-router.delete("/urls/:id",deleteURL)
+router.delete("/urls/:id",tokenVerify,deleteURL);
 
 export default router;

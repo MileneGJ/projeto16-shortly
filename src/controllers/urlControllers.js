@@ -12,10 +12,10 @@ export async function createShortURL (_,res) {
             'INSERT INTO urls (url,"shortUrl","visitCount","userId") VALUES ($1,$2,$3,$4)',
             [res.locals.newUrl,id,0,userId.rows[0].id]);
 
-        res.status(201).send(id);
+        return res.status(201).send(id);
     } catch (error) {
         console.log(error);
-        res.sendStatus(500)
+        return res.sendStatus(500)
     }
 }
 
@@ -27,13 +27,13 @@ export async function getOneURL (req,res) {
             [urlId]
             );
         if(foundUrl.rows.length>0) {
-            res.status(200).send(foundUrl.rows[0]);
+            return res.status(200).send(foundUrl.rows[0]);
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 }
 
@@ -49,16 +49,39 @@ export async function openShortURL (req,res) {
                 'UPDATE urls SET "visitCount"=$1 WHERE id=$2',
                 [foundUrl.rows[0].visitCount++,foundUrl.rows[0].id]
             );
-            res.redirect(foundUrl.rows[0].url)
+            return res.redirect(foundUrl.rows[0].url)
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
+        return res.sendStatus(500);
     }
 }
 
-export function deleteURL () {
-    
+export async function deleteURL (req,res) {
+    const user = res.locals.authUser;
+    const urlId = req.params.id;
+    try {
+        const foundUrl = await connection.query(
+            'SELECT userId FROM urls WHERE id=$1',
+            [urlId]
+            );
+        if(foundUrl.rows.length>0){
+            if(user.id===foundUrl.rows[0].userId){
+                await connection.query(
+                    'DELETE FROM urls WHERE id=$1',
+                    [urlId]
+                    )
+                return res.sendStatus(204);
+            } else {
+                return res.sendStatus(401);
+            }
+        } else {
+            return res.sendStatus(404);
+        }
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
 }
