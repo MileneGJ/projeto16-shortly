@@ -7,30 +7,47 @@ export async function listUserURLs(_, res) {
             'SELECT id,name FROM users WHERE email=$1',
             [user.email]
         );
-        if (foundUser.rows.length === 0) {
+        if (foundUser.rows.length > 0) {
+            const userUrls = await connection.query(
+                'SELECT urls.id,urls."shortUrl",urls.url,urls."visitCount" FROM urls WHERE "userId"=$1',
+                [foundUser.rows[0].id]
+            );
+            const visitSum = await connection.query(
+                'SELECT SUM(urls."visitCount") FROM urls WHERE "userId"=$1',
+                [foundUser.rows[0].id]
+            );
+            const resObject = {
+                id: foundUser.rows[0].id,
+                name: foundUser.rows[0].name,
+                visitCount: parseInt(visitSum.rows[0].sum),
+                shortenedUrls: userUrls.rows
+            }
+            return res.status(200).send(resObject);
+        } else {
             return res.sendStatus(404);
         }
-        const userUrls = await connection.query(
-            'SELECT urls.id,urls."shortUrl",urls.url,urls."visitCount" FROM urls WHERE "userId"=$1',
-            [foundUser.rows[0].id]
-        );
-        const visitSum = await connection.query(
-            'SELECT SUM(urls."visitCount") FROM urls WHERE "userId"=$1',
-            [foundUser.rows[0].id]
-        );
-        const resObject = {
-            id: foundUser.rows[0].id,
-            name: foundUser.rows[0].name,
-            visitCount: parseInt(visitSum.rows[0].sum),
-            shortenedUrls:userUrls.rows
-        }
-        return res.status(200).send(resObject);
     } catch (error) {
-        console.log(error)
-        return res.sendStatus(500)
+        console.log(error);
+        return res.sendStatus(500);
     }
 }
 
-export function listUserRanking() {
-
+export async function listUserRanking(_,res) {
+    try {
+        const ranking = await connection.query(
+            `SELECT 
+            users.id,
+            users.name,
+            COUNT(urls.id)::INTEGER as "linksCount",
+            COALESCE(SUM(urls."visitCount"),0)::INTEGER as "visitCount"
+            FROM users LEFT JOIN urls ON users.id=urls."userId" 
+            GROUP BY users.id
+            ORDER BY "visitCount" DESC
+            LIMIT 10`
+        ); 
+        res.status(200).send(ranking.rows);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
 }
