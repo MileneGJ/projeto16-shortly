@@ -1,21 +1,13 @@
-import connection from '../dbStrategy/database.js'
+import userRep from '../repositories/userRepository.js'
+import urlRep from '../repositories/urlRepository.js'
 
 export async function listUserURLs(_, res) {
     const user = res.locals.authUser;
     try {
-        const foundUser = await connection.query(
-            'SELECT id,name FROM users WHERE email=$1',
-            [user.email]
-        );
+        const foundUser = await userRep.getUserByEmail(user.email);
         if (foundUser.rows.length > 0) {
-            const userUrls = await connection.query(
-                'SELECT urls.id,urls."shortUrl",urls.url,urls."visitCount" FROM urls WHERE "userId"=$1',
-                [foundUser.rows[0].id]
-            );
-            const visitSum = await connection.query(
-                'SELECT SUM(urls."visitCount") FROM urls WHERE "userId"=$1',
-                [foundUser.rows[0].id]
-            );
+            const userUrls = await urlRep.getUrlBy(foundUser.rows[0].id, 'userIdFormatted');
+            const visitSum = await urlRep.sumVisitsByUser(foundUser.rows[0].id);
             const resObject = {
                 id: foundUser.rows[0].id,
                 name: foundUser.rows[0].name,
@@ -32,19 +24,9 @@ export async function listUserURLs(_, res) {
     }
 }
 
-export async function listUserRanking(_,res) {
+export async function listUserRanking(_, res) {
     try {
-        const ranking = await connection.query(
-            `SELECT 
-            users.id,
-            users.name,
-            COUNT(urls.id)::INTEGER as "linksCount",
-            COALESCE(SUM(urls."visitCount"),0)::INTEGER as "visitCount"
-            FROM users LEFT JOIN urls ON users.id=urls."userId" 
-            GROUP BY users.id
-            ORDER BY "visitCount" DESC
-            LIMIT 10`
-        ); 
+        const ranking = await urlRep.getRanking();
         res.status(200).send(ranking.rows);
     } catch (error) {
         console.log(error);

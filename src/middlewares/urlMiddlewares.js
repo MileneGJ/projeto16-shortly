@@ -1,4 +1,3 @@
-import { resourceLimits } from 'worker_threads';
 import urlSchema from '../schemas/urlSchema.js'
 
 export function validateURL (req,res,next) {

@@ -1,7 +1,7 @@
 import signUpSchema from "../schemas/signUpSchema.js";
 import signInSchema from "../schemas/signInSchema.js";
-import connection from '../dbStrategy/database.js';
 import { encodeC } from "../providers/cryptProvider.js";
+import userRep from '../repositories/userRepository.js'
 
 export async function validateSignUp(req, res, next) {
     const validation = signUpSchema.validate(req.body);
@@ -9,9 +9,7 @@ export async function validateSignUp(req, res, next) {
         return res.status(422).send(validation.error.details[0].message)
     }
     try {
-        const foundUser = await connection.query(
-            'SELECT * FROM users WHERE email=$1',
-            [req.body.email])
+        const foundUser = await userRep.getUserByEmail(req.body.email)
         if(foundUser.rows.length>0){
             return res.sendStatus(409);
         } else {
