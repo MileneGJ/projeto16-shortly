@@ -11,7 +11,7 @@ export async function listUserURLs(_, res) {
             const resObject = {
                 id: foundUser.rows[0].id,
                 name: foundUser.rows[0].name,
-                visitCount: parseInt(visitSum.rows[0].sum),
+                visitCount: parseInt(visitSum.rows[0].coalesce),
                 shortenedUrls: userUrls.rows
             }
             return res.status(200).send(resObject);

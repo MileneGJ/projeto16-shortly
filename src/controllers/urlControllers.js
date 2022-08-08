@@ -50,9 +50,10 @@ export async function deleteURL(req, res) {
     const user = res.locals.authUser;
     const urlId = req.params.id;
     try {
+        const foundUser = await userRep.getUserByEmail(user.email);
         const foundUrl = await urlRep.getUrlBy(urlId,'id');
         if (foundUrl.rows.length > 0) {
-            if (user.id === foundUrl.rows[0].userId) {
+            if (foundUser.rows[0].id === foundUrl.rows[0].userId) {
                 await urlRep.deleteUrl(urlId)
                 return res.sendStatus(204);
             } else {

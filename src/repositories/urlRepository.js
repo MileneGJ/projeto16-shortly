@@ -48,7 +48,7 @@ async function increaseVisitCount(visitCount, urlId) {
 
 async function sumVisitsByUser(userId) {
     return await connection.query(
-        'SELECT SUM(urls."visitCount") FROM urls WHERE "userId"=$1',
+        'SELECT COALESCE(SUM(urls."visitCount"),0)::INTEGER FROM urls WHERE "userId"=$1',
         [userId]
     );
 }
